@@ -248,6 +248,15 @@ let state = JSON.parse(localStorage.getItem(STORAGE_KEY)) || defaultData;
 let currentRole = "ADMIN";
 let currentWorkerId = null;
 
+function escapeHtml(str) {
+  return String(str ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 function saveState() {
   state.updatedAt = new Date().toLocaleString("fr-FR");
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
@@ -263,7 +272,7 @@ function toggleWorkerSelect() {
 function populateDropdowns() {
   const wSel = document.getElementById("workerSelectDropdown");
   const aSel = document.getElementById("actionEmpSelect");
-  wSel.innerHTML = state.employees.map(e => `<option value="${e.id}">${e.name} — ${e.role}</option>`).join("");
+  wSel.innerHTML = state.employees.map(e => `<option value="${escapeHtml(e.id)}">${escapeHtml(e.name)} — ${escapeHtml(e.role)}</option>`).join("");
   aSel.innerHTML = wSel.innerHTML;
 }
 
@@ -404,38 +413,38 @@ function renderAll() {
   `;
 
   document.getElementById("employeesList").innerHTML = visibleEmps.map(e => {
-    const gross = (e.normalH * e.rate) + (e.otH * e.otRate);
-    const net = Math.max(0, gross - e.advances);
+    const gross = (Number(e.normalH) * Number(e.rate)) + (Number(e.otH) * Number(e.otRate));
+    const net = Math.max(0, gross - Number(e.advances));
     return `
       <div class="card">
         <div class="row">
           <div>
-            <div style="font-weight:800;font-size:16px">${e.name}</div>
-            <div style="font-size:12px;color:var(--muted)">${e.role} • 🏢 ${e.company}</div>
+            <div style="font-weight:800;font-size:16px">${escapeHtml(e.name)}</div>
+            <div style="font-size:12px;color:var(--muted)">${escapeHtml(e.role)} • 🏢 ${escapeHtml(e.company)}</div>
           </div>
           <span class="pill" style="background:rgba(0,200,83,0.18);color:var(--green)">Reste: ${net.toFixed(0)} MAD</span>
         </div>
         <div style="font-size:12px;margin:10px 0;line-height:1.6">
-          ⏱️ Normales (9h/j) : <b>${e.normalH}h</b> (${e.rate} MAD/h) | ⚡ Heures Sup : <b>+${e.otH}h</b> (${e.otRate} MAD/h)<br/>
-          💰 Salaire Brut : <b>${gross.toFixed(0)} MAD</b> | 💸 Avances : <b style="color:var(--amber)">-${e.advances.toFixed(0)} MAD</b><br/>
-          📅 Payé Mois Dernier : <b>${e.lastMonthPaid} MAD</b>
+          ⏱️ Normales (9h/j) : <b>${Number(e.normalH)}h</b> (${Number(e.rate)} MAD/h) | ⚡ Heures Sup : <b>+${Number(e.otH)}h</b> (${Number(e.otRate)} MAD/h)<br/>
+          💰 Salaire Brut : <b>${gross.toFixed(0)} MAD</b> | 💸 Avances : <b style="color:var(--amber)">-${Number(e.advances).toFixed(0)} MAD</b><br/>
+          📅 Payé Mois Dernier : <b>${Number(e.lastMonthPaid)} MAD</b>
         </div>
-        <button class="whatsapp" onclick="shareWhatsApp('${e.id}')">📲 Envoyer Fiche WhatsApp (*6)</button>
+        <button class="whatsapp" onclick="shareWhatsApp('${escapeHtml(e.id)}')">📲 Envoyer Fiche WhatsApp (*6)</button>
       </div>
     `;
   }).join("");
 
   document.getElementById("stockList").innerHTML = state.stock.map(s => {
-    const isLow = s.qty <= s.min;
+    const isLow = Number(s.qty) <= Number(s.min);
     return `
       <div class="card">
         <div class="row">
           <div>
-            <div style="font-weight:700">${s.name}</div>
-            <div style="font-size:12px;color:var(--muted)">Seuil minimum : ${s.min} ${s.unit}</div>
+            <div style="font-weight:700">${escapeHtml(s.name)}</div>
+            <div style="font-size:12px;color:var(--muted)">Seuil minimum : ${Number(s.min)} ${escapeHtml(s.unit)}</div>
           </div>
           <span class="pill" style="background:${isLow ? 'rgba(255,82,82,0.2)' : 'rgba(0,200,83,0.2)'};color:${isLow ? 'var(--red)' : 'var(--green)'}">
-            ${s.qty} ${s.unit} ${isLow ? '⚠️ BAS' : '✅ OK'}
+            ${Number(s.qty)} ${escapeHtml(s.unit)} ${isLow ? '⚠️ BAS' : '✅ OK'}
           </span>
         </div>
       </div>

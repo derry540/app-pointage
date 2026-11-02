@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="400dp"
+    android:height="180dp"
+    android:viewportWidth="400"
+    android:viewportHeight="180">
+    <!-- Deep Slate Industrial Backdrop -->
+    <path android:pathData="M0,0h400v180h-400z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="0"
+                android:startY="0"
+                android:endX="400"
+                android:endY="180"
+                android:type="linear">
+                <item android:offset="0.0" android:color="#0F172A" />
+                <item android:offset="0.6" android:color="#1E293B" />
+                <item android:offset="1.0" android:color="#334155" />
+            </gradient>
+        </aapt:attr>
+    </path>
+    <!-- Grid Lines -->
+    <path
+        android:strokeColor="#1E3A8A"
+        android:strokeWidth="1"
+        android:strokeAlpha="0.35"
+        android:pathData="M0,45 L400,45 M0,90 L400,90 M0,135 L400,135 M80,0 L80,180 M160,0 L160,180 M240,0 L240,180 M320,0 L320,180" />
+    <!-- Glowing Copper Thermal Pipes -->
+    <path
+        android:strokeColor="#F97316"
+        android:strokeWidth="6"
+        android:strokeLineCap="round"
+        android:pathData="M-10,140 L110,140 L140,105 L260,105 L295,65 L410,65" />
+    <path
+        android:strokeColor="#38BDF8"
+        android:strokeWidth="4"
+        android:strokeLineCap="round"
+        android:pathData="M-10,156 L125,156 L155,121 L275,121 L310,81 L410,81" />
+    <!-- Boiler / Heat Exchanger Cylinder -->
+    <path
+        android:fillColor="#1E293B"
+        android:strokeColor="#F97316"
+        android:strokeWidth="3"
+        android:pathData="M280,35 C280,25 350,25 350,35 L350,145 C350,155 280,155 280,145 Z" />
+    <!-- Flame Emblem on Boiler -->
+    <path
+        android:fillColor="#FB923C"
+        android:pathData="M315,62 C315,62 332,76 332,92 C332,102 324,110 315,110 C306,110 298,102 298,92 C298,84 303,77 307,73 C307,78 310,81 312,81 C310,74 312,67 315,62 Z" />
+    <!-- Telemetry Gauge Circle -->
+    <path
+        android:fillColor="#0F172A"
+        android:strokeColor="#38BDF8"
+        android:strokeWidth="3"
+        android:pathData="M195,70 m-26,0 a26,26 0 1,0 52,0 a26,26 0 1,0 -52,0" />
+    <path
+        android:strokeColor="#10B981"
+        android:strokeWidth="3"
+        android:strokeLineCap="round"
+        android:pathData="M195,70 L209,56" />
+</vector>

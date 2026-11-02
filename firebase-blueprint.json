@@ -1,0 +1,284 @@
+{
+  "entities": {
+    "EmployeeProfile": {
+      "title": "EmployeeProfile",
+      "description": "Employee profile with variable hourly rate, overtime bonus (>9h), commission percentage, and role.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Authenticated owner/organization UID" },
+        "fullName": { "type": "string", "description": "Employee full name" },
+        "workerEmail": { "type": "string", "description": "Employee email for portal view and monthly report automation" },
+        "role": { "type": "string", "enum": ["ADMIN", "MANAGER", "WORKER"], "description": "Access role in the company" },
+        "specialty": { "type": "string", "description": "Thermal engineering specialty or category" },
+        "hourlyRate": { "type": "number", "description": "Standard hourly wage in MAD (up to 9h/day)" },
+        "overtimeBonusRate": { "type": "number", "description": "Overtime hourly rate + bonus in MAD (above 9h/day)" },
+        "commissionPercent": { "type": "number", "description": "Monthly commission percentage" },
+        "lastMonthPaidTotal": { "type": "number", "description": "Total amount paid at the end of the previous month in MAD" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server creation timestamp via FieldValue.serverTimestamp()" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server update timestamp via FieldValue.serverTimestamp()" }
+      },
+      "required": [
+        "userId",
+        "fullName",
+        "workerEmail",
+        "role",
+        "specialty",
+        "hourlyRate",
+        "overtimeBonusRate",
+        "commissionPercent",
+        "lastMonthPaidTotal",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "AttendanceLog": {
+      "title": "AttendanceLog",
+      "description": "Daily pointage log supporting multiple company shifts, 9h regular cap, overtime calculation, optional task, note, and performance rating.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Authenticated owner UID" },
+        "employeeId": { "type": "string", "description": "Referenced EmployeeProfile ID" },
+        "employeeName": { "type": "string", "description": "Employee display name" },
+        "date": { "type": "string", "description": "Work date YYYY-MM-DD" },
+        "monthKey": { "type": "string", "description": "Month key YYYY-MM for monthly aggregation" },
+        "companyName": { "type": "string", "description": "Client company or multi-company names worked on this day" },
+        "shiftsSummary": { "type": "string", "description": "Formatted time intervals and client companies worked during the day" },
+        "taskDescription": { "type": "string", "description": "Optional task performed by the employee" },
+        "dailyNote": { "type": "string", "description": "Admin daily observation/note on the employee" },
+        "performanceRating": { "type": "integer", "description": "Daily performance score from 1 to 5" },
+        "totalHours": { "type": "number", "description": "Total hours worked in the day" },
+        "regularHours": { "type": "number", "description": "Regular hours capped at 9.0 hours/day" },
+        "overtimeHours": { "type": "number", "description": "Overtime hours above 9.0 hours/day" },
+        "dailyPay": { "type": "number", "description": "Automatically computed daily pay including overtime bonus in MAD" },
+        "recordedBy": { "type": "string", "description": "Admin or user who recorded the pointage" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server creation timestamp via FieldValue.serverTimestamp()" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server update timestamp via FieldValue.serverTimestamp()" }
+      },
+      "required": [
+        "userId",
+        "employeeId",
+        "employeeName",
+        "date",
+        "monthKey",
+        "companyName",
+        "shiftsSummary",
+        "taskDescription",
+        "dailyNote",
+        "performanceRating",
+        "totalHours",
+        "regularHours",
+        "overtimeHours",
+        "dailyPay",
+        "recordedBy",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "SalaryAdvance": {
+      "title": "SalaryAdvance",
+      "description": "Advance payment given to an employee during a pay period.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Authenticated owner UID" },
+        "employeeId": { "type": "string", "description": "Referenced EmployeeProfile ID" },
+        "employeeName": { "type": "string", "description": "Employee display name" },
+        "amount": { "type": "number", "description": "Advance amount in MAD" },
+        "date": { "type": "string", "description": "Date of advance YYYY-MM-DD" },
+        "monthKey": { "type": "string", "description": "Month key YYYY-MM" },
+        "note": { "type": "string", "description": "Reason or payment method note" },
+        "recordedBy": { "type": "string", "description": "Admin who recorded the advance" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server creation timestamp via FieldValue.serverTimestamp()" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server update timestamp via FieldValue.serverTimestamp()" }
+      },
+      "required": [
+        "userId",
+        "employeeId",
+        "employeeName",
+        "amount",
+        "date",
+        "monthKey",
+        "note",
+        "recordedBy",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "ClientCompany": {
+      "title": "ClientCompany",
+      "description": "Registered client company or job site where thermal equipment technicians operate.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Authenticated owner UID" },
+        "name": { "type": "string", "description": "Company or site name" },
+        "city": { "type": "string", "description": "City or zone" },
+        "contactName": { "type": "string", "description": "Site manager or client contact" },
+        "phone": { "type": "string", "description": "Contact phone number" },
+        "contractType": { "type": "string", "description": "Type of thermal contract (Installation, Maintenance, Dépannage)" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server creation timestamp via FieldValue.serverTimestamp()" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server update timestamp via FieldValue.serverTimestamp()" }
+      },
+      "required": [
+        "userId",
+        "name",
+        "city",
+        "contactName",
+        "phone",
+        "contractType",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "StockItem": {
+      "title": "StockItem",
+      "description": "Thermal equipment inventory item with automated reorder point alerts and daily stock task notes.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Authenticated owner UID" },
+        "name": { "type": "string", "description": "Equipment or part name" },
+        "category": { "type": "string", "description": "Equipment category" },
+        "currentQuantity": { "type": "integer", "description": "Current stock quantity on hand" },
+        "reorderPoint": { "type": "integer", "description": "Minimum threshold triggering automatic restock alert" },
+        "unit": { "type": "string", "description": "Measurement unit (Pièce, Mètre, Kit, Carton)" },
+        "unitPrice": { "type": "number", "description": "Unit purchase price in MAD" },
+        "supplierName": { "type": "string", "description": "Preferred supplier name" },
+        "dailyTaskNote": { "type": "string", "description": "Daily task or movement note related to this stock item" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server creation timestamp via FieldValue.serverTimestamp()" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server update timestamp via FieldValue.serverTimestamp()" }
+      },
+      "required": [
+        "userId",
+        "name",
+        "category",
+        "currentQuantity",
+        "reorderPoint",
+        "unit",
+        "unitPrice",
+        "supplierName",
+        "dailyTaskNote",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "DailyProcurement": {
+      "title": "DailyProcurement",
+      "description": "Daily goods/materials to be procured for a specific client company/site.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Authenticated owner UID" },
+        "date": { "type": "string", "description": "Procurement target date YYYY-MM-DD" },
+        "companyId": { "type": "string", "description": "Client company ID" },
+        "companyName": { "type": "string", "description": "Client company name" },
+        "itemName": { "type": "string", "description": "Material or thermal part to procure" },
+        "quantity": { "type": "integer", "description": "Quantity needed" },
+        "unitCost": { "type": "number", "description": "Estimated unit cost in MAD" },
+        "totalCost": { "type": "number", "description": "Total estimated cost in MAD" },
+        "status": { "type": "string", "enum": ["NEEDED", "ORDERED", "RECEIVED"], "description": "Procurement status" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server creation timestamp via FieldValue.serverTimestamp()" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server update timestamp via FieldValue.serverTimestamp()" }
+      },
+      "required": [
+        "userId",
+        "date",
+        "companyId",
+        "companyName",
+        "itemName",
+        "quantity",
+        "unitCost",
+        "totalCost",
+        "status",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "SupplierRecord": {
+      "title": "SupplierRecord",
+      "description": "Supplier profile with payment terms, due date schedule, and payment reminders.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Authenticated owner UID" },
+        "name": { "type": "string", "description": "Supplier company name" },
+        "contactInfo": { "type": "string", "description": "Phone and email contact details" },
+        "paymentTerms": { "type": "string", "description": "Payment terms (e.g. 30 Jours FDM, 60 Jours)" },
+        "invoiceReference": { "type": "string", "description": "Invoice or order reference" },
+        "amountDue": { "type": "number", "description": "Total invoice amount in MAD" },
+        "amountPaid": { "type": "number", "description": "Amount already paid in MAD" },
+        "dueDate": { "type": "string", "description": "Payment due date YYYY-MM-DD" },
+        "status": { "type": "string", "enum": ["PENDING", "PARTIAL", "PAID", "OVERDUE"], "description": "Payment schedule status" },
+        "reminderEnabled": { "type": "boolean", "description": "Whether automated due date reminders are active" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server creation timestamp via FieldValue.serverTimestamp()" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server update timestamp via FieldValue.serverTimestamp()" }
+      },
+      "required": [
+        "userId",
+        "name",
+        "contactInfo",
+        "paymentTerms",
+        "invoiceReference",
+        "amountDue",
+        "amountPaid",
+        "dueDate",
+        "status",
+        "reminderEnabled",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "AuditLogEntry": {
+      "title": "AuditLogEntry",
+      "description": "Immutable access and modification history log entry.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Authenticated owner UID" },
+        "actorName": { "type": "string", "description": "Display name or email of user performing the action" },
+        "actorRole": { "type": "string", "description": "Role of the actor" },
+        "actionType": { "type": "string", "enum": ["CREATE", "UPDATE", "DELETE", "EXPORT", "ERP_SYNC", "ROLE_CHANGE"], "description": "Type of audited operation" },
+        "module": { "type": "string", "description": "Target module (Pointage, Paie, Stock, Fournisseurs, Oxygene ERP)" },
+        "details": { "type": "string", "description": "Human-readable audit description" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server creation timestamp via FieldValue.serverTimestamp()" }
+      },
+      "required": [
+        "userId",
+        "actorName",
+        "actorRole",
+        "actionType",
+        "module",
+        "details",
+        "createdAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/employees/{employeeId}": {
+      "schema": { "$ref": "#/entities/EmployeeProfile" },
+      "description": "Employee profiles and hourly rate categories scoped by userId."
+    },
+    "/attendance_logs/{logId}": {
+      "schema": { "$ref": "#/entities/AttendanceLog" },
+      "description": "Daily employee attendance, multi-company shifts, regular/overtime hours, notes, and ratings."
+    },
+    "/advances/{advanceId}": {
+      "schema": { "$ref": "#/entities/SalaryAdvance" },
+      "description": "Employee salary advances recorded during each month."
+    },
+    "/companies/{companyId}": {
+      "schema": { "$ref": "#/entities/ClientCompany" },
+      "description": "Client companies and thermal installation sites."
+    },
+    "/stock_items/{itemId}": {
+      "schema": { "$ref": "#/entities/StockItem" },
+      "description": "Thermal equipment inventory items and reorder thresholds."
+    },
+    "/daily_procurements/{procurementId}": {
+      "schema": { "$ref": "#/entities/DailyProcurement" },
+      "description": "Daily goods to be procured per client company/site."
+    },
+    "/suppliers/{supplierId}": {
+      "schema": { "$ref": "#/entities/SupplierRecord" },
+      "description": "Suppliers, payment terms, and payment schedules."
+    },
+    "/audit_logs/{auditId}": {
+      "schema": { "$ref": "#/entities/AuditLogEntry" },
+      "description": "Append-only audit trail of administrative actions and modifications."
+    }
+  }
+}

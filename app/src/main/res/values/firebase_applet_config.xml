@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<resources>
+    <string name="firestore_database_id" translatable="false">ai-studio-android-thermopo-b31fd8f6-6446-4bee-a6ef-ebfca232e847</string>
+    <string name="recaptcha_site_key" translatable="false">6LeIwQsuAAAAAOT441rGdQHQ6FnhasHYUCe8rm7p</string>
+</resources>

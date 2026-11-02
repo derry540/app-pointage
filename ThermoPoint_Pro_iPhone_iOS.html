@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="ThermoPoint" />
+<title>ThermoPoint Pro — Équipements Thermiques (iPhone &amp; Android)</title>
+<style>
+  :root {
+    --bg: #07111E;
+    --card: #102033;
+    --card-alt: #162B44;
+    --primary: #FF6D00;
+    --cyan: #00B0FF;
+    --green: #00C853;
+    --amber: #FFB300;
+    --red: #FF5252;
+    --text: #F5F7FA;
+    --muted: #90A4AE;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0;
+    padding: env(safe-area-inset-top, 16px) 14px calc(env(safe-area-inset-bottom, 20px) + 76px) 14px;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+  }
+  .hero {
+    background: linear-gradient(135deg, #0D2238 0%, #1A365D 60%, #FF6D00 160%);
+    border-radius: 18px;
+    padding: 18px;
+    margin-bottom: 14px;
+    border: 1px solid rgba(255,109,0,0.35);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+  }
+  .hero h1 { margin: 0 0 4px 0; font-size: 20px; font-weight: 800; letter-spacing: 0.4px; }
+  .hero p { margin: 0; font-size: 12px; color: #CFD8DC; }
+  .badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    background: rgba(255,109,0,0.2);
+    color: #FF9E40;
+    margin-bottom: 8px;
+  }
+  .card {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 15px;
+    margin-bottom: 12px;
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .kpi {
+    background: var(--card-alt);
+    border-radius: 14px;
+    padding: 12px;
+    border-left: 4px solid var(--primary);
+  }
+  .kpi .lbl { font-size: 11px; color: var(--muted); }
+  .kpi .val { font-size: 17px; font-weight: 800; margin-top: 4px; }
+  input, select, textarea {
+    width: 100%;
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.16);
+    background: #0B1829;
+    color: #fff;
+    font-size: 14px;
+    margin-bottom: 10px;
+  }
+  button {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: none;
+    background: var(--primary);
+    color: #fff;
+    font-weight: 800;
+    font-size: 14px;
+    cursor: pointer;
+    margin-bottom: 8px;
+  }
+  button.secondary { background: #1E3A5F; }
+  button.whatsapp { background: #00C853; }
+  .row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .pill { padding: 3px 8px; border-radius: 8px; font-size: 11px; font-weight: 700; }
+  .bottom-nav {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: rgba(16, 32, 51, 0.96);
+    backdrop-filter: blur(12px);
+    display: flex;
+    justify-content: space-around;
+    padding: 8px 6px calc(env(safe-area-inset-bottom, 10px) + 6px) 6px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    z-index: 99;
+  }
+  .nav-btn {
+    background: transparent;
+    color: var(--muted);
+    font-size: 11px;
+    padding: 6px;
+    margin: 0;
+    border-radius: 10px;
+  }
+  .nav-btn.active { color: var(--primary); background: rgba(255,109,0,0.14); }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <span class="badge" id="roleBadge">BASE DE DONNÉES HYBRIDE (iPhone + Cloud Firebase)</span>
+  <h1>🔥 ÉQUIPEMENTS THERMIQUES</h1>
+  <p>ThermoPoint Pro — Pointage 9h/j + Heures Sup, Avances, Stock &amp; Synchro</p>
+</div>
+
+<!-- LOGIN SCREEN -->
+<div id="loginScreen" class="card">
+  <h3 style="margin-top:0">🔐 Accès Sans Connexion / iPhone &amp; Android</h3>
+  <p style="font-size:12px;color:var(--muted)">
+    Astuce iPhone : Dans Safari, touchez <b>Partager ⬆️</b> puis <b>"Sur l'écran d'accueil"</b> pour installer l'application.
+  </p>
+  <label style="font-size:12px;color:var(--muted)">Choisir le profil :</label>
+  <select id="loginRoleSelect" onchange="toggleWorkerSelect()">
+    <option value="ADMIN">👩‍💼 Compte Admin (Gestion Complète — PIN 1234)</option>
+    <option value="WORKER">👷 Compte Salarié (Consultation Seule — PIN 0000)</option>
+  </select>
+  <div id="workerSelectWrap" class="hidden">
+    <label style="font-size:12px;color:var(--muted)">Votre nom (Salarié) :</label>
+    <select id="workerSelectDropdown"></select>
+  </div>
+  <input type="password" id="pinInput" placeholder="Code PIN (Admin: 1234 | Salarié: 0000)" value="1234" />
+  <button onclick="handleLogin()">Se Connecter</button>
+</div>
+
+<!-- MAIN APP -->
+<div id="appContainer" class="hidden">
+  <!-- TAB 1: DASHBOARD -->
+  <div id="tabDashboard">
+    <div class="kpi-grid" id="kpiGrid"></div>
+    <div class="card">
+      <h3 style="margin-top:0">🗄️ État de la Base de Données</h3>
+      <p style="font-size:12px;color:#CFD8DC;line-height:1.5;margin-top:0">
+        ✅ <b>Sauvegarde Locale iPhone / Android :</b> Active automatiquement (<i>Sans Connexion</i> dans la mémoire sécurisée de votre appareil).<br/>
+        ☁️ <b>Base Cloud Firebase :</b> <code>ai-studio-android-thermopo-b31fd8f6</code><br/>
+        🕒 <b>Dernière sauvegarde :</b> <span id="lastSavedText">À l'instant</span>
+      </p>
+      <div id="adminQuickActions">
+        <button onclick="switchTab('tabEmployees')">👷 Pointer Heures / Donner Avance</button>
+        <button class="secondary" onclick="switchTab('tabSync')">🔄 Synchroniser / Sauvegarder Base de Données</button>
+      </div>
+      <button class="secondary" onclick="logout()">🔒 Changer de Compte (Admin / Salarié)</button>
+    </div>
+  </div>
+
+  <!-- TAB 2: EMPLOYEES & PAYROLL -->
+  <div id="tabEmployees" class="hidden">
+    <div id="adminAddForms" class="card">
+      <h3 style="margin-top:0">➕ Pointer Journée / Donner Avance</h3>
+      <select id="actionEmpSelect"></select>
+      <div class="row">
+        <input type="number" id="hoursInput" placeholder="Heures travaillées (ex: 9 ou 11)" step="0.5" />
+        <input type="text" id="companyInput" placeholder="Société cliente (ex: OCP)" />
+      </div>
+      <button onclick="addAttendance()">✅ Enregistrer Pointage (9h standard + Bonus &gt;9h)</button>
+      <hr style="border-color:rgba(255,255,255,0.08);margin:12px 0" />
+      <div class="row">
+        <input type="number" id="advanceInput" placeholder="Montant Avance (MAD)" />
+        <input type="text" id="advanceNote" placeholder="Motif (ex: Avance espèce)" />
+      </div>
+      <button class="secondary" onclick="addAdvance()">💸 Déduire une Avance (MAD)</button>
+    </div>
+
+    <div id="employeesList"></div>
+  </div>
+
+  <!-- TAB 3: STOCK -->
+  <div id="tabStock" class="hidden">
+    <div id="adminStockForm" class="card">
+      <h3 style="margin-top:0">📦 Mettre à Jour le Stock</h3>
+      <input type="text" id="stockName" placeholder="Article (ex: Brûleur Riello 40 G20)" />
+      <div class="row">
+        <input type="number" id="stockQty" placeholder="Quantité actuelle" />
+        <input type="number" id="stockMin" placeholder="Seuil alerte min" value="5" />
+      </div>
+      <button onclick="addOrUpdateStock()">Enregistrer Article</button>
+    </div>
+    <div id="stockList"></div>
+  </div>
+
+  <!-- TAB 4: DATABASE & SYNC -->
+  <div id="tabSync" class="hidden">
+    <div class="card">
+      <h3 style="margin-top:0">🔄 Synchronisation &amp; Sauvegarde Base de Données</h3>
+      <p style="font-size:12px;color:var(--muted);line-height:1.5">
+        1. <b>Sur votre iPhone (Sans Connexion) :</b> Toutes vos modifications sont enregistrées instantanément dans la mémoire de l'iPhone.<br/>
+        2. <b>Partage vers les Salariés (WhatsApp *6 / Android / iPhone) :</b> Vous pouvez envoyer la mise à jour à un salarié ou exporter toute la base.
+      </p>
+      <button class="whatsapp" onclick="shareDatabaseViaWhatsApp()">📲 Envoyer Code de Synchronisation via WhatsApp (*6)</button>
+      <button class="secondary" onclick="downloadDatabaseBackup()">💾 Télécharger Sauvegarde Fichier (.json) sur iPhone / iCloud</button>
+      <hr style="border-color:rgba(255,255,255,0.08);margin:14px 0" />
+      <h4 style="margin:0 0 8px 0">📥 Importer / Coller un Code de Synchronisation</h4>
+      <textarea id="syncImportBox" rows="3" placeholder="Collez ici le code reçu sur WhatsApp pour mettre à jour les salaires et avances..."></textarea>
+      <button onclick="importDatabaseFromCode()">✅ Appliquer la Mise à Jour</button>
+    </div>
+  </div>
+</div>
+
+<!-- BOTTOM NAVIGATION -->
+<div id="bottomNav" class="bottom-nav hidden">
+  <button class="nav-btn active" id="btnTabDashboard" onclick="switchTab('tabDashboard')">🏠 Accueil</button>
+  <button class="nav-btn" id="btnTabEmployees" onclick="switchTab('tabEmployees')">👷 Salaires</button>
+  <button class="nav-btn" id="btnTabStock" onclick="switchTab('tabStock')">📦 Stock</button>
+  <button class="nav-btn" id="btnTabSync" onclick="switchTab('tabSync')">🗄️ Base/Sync</button>
+</div>
+
+<script>
+const STORAGE_KEY = "thermopoint_pro_ios_v1";
+const defaultData = {
+  updatedAt: new Date().toLocaleString("fr-FR"),
+  employees: [
+    { id: "e1", name: "Youssef El Amrani", role: "Technicien Brûleurs", rate: 35, otRate: 50, normalH: 162, otH: 14, advances: 1200, lastMonthPaid: 6850, company: "OCP Jorf Lasfar" },
+    { id: "e2", name: "Karim Benali", role: "Soudeur Tuyauterie Vapeur", rate: 40, otRate: 55, normalH: 153, otH: 18, advances: 1500, lastMonthPaid: 7200, company: "Cosumar Casablanca" },
+    { id: "e3", name: "Rachid Tazi", role: "Électromécanicien Chaudières", rate: 32, otRate: 45, normalH: 144, otH: 8, advances: 800, lastMonthPaid: 5900, company: "Centrale Danone" },
+    { id: "e4", name: "Hicham Idrissi", role: "Monteur Calorifugeur", rate: 28, otRate: 40, normalH: 162, otH: 6, advances: 500, lastMonthPaid: 5100, company: "LafargeHolcim" }
+  ],
+  stock: [
+    { name: "Brûleur Fioul Riello Press GW", qty: 2, min: 4, unit: "Unités" },
+    { name: "Vanne Vapeur Spirax Sarco DN50", qty: 3, min: 5, unit: "Unités" },
+    { name: "Thermostat Sécurité Chaudière", qty: 14, min: 5, unit: "Pièces" },
+    { name: "Pompe Fuel Suntec AS47", qty: 8, min: 4, unit: "Pièces" }
+  ]
+};
+
+let state = JSON.parse(localStorage.getItem(STORAGE_KEY)) || defaultData;
+let currentRole = "ADMIN";
+let currentWorkerId = null;
+
+function saveState() {
+  state.updatedAt = new Date().toLocaleString("fr-FR");
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  renderAll();
+}
+
+function toggleWorkerSelect() {
+  const role = document.getElementById("loginRoleSelect").value;
+  document.getElementById("workerSelectWrap").classList.toggle("hidden", role !== "WORKER");
+  document.getElementById("pinInput").value = role === "ADMIN" ? "1234" : "0000";
+}
+
+function populateDropdowns() {
+  const wSel = document.getElementById("workerSelectDropdown");
+  const aSel = document.getElementById("actionEmpSelect");
+  wSel.innerHTML = state.employees.map(e => `<option value="${e.id}">${e.name} — ${e.role}</option>`).join("");
+  aSel.innerHTML = wSel.innerHTML;
+}
+
+function handleLogin() {
+  const role = document.getElementById("loginRoleSelect").value;
+  const pin = document.getElementById("pinInput").value.trim();
+  if (role === "ADMIN" && pin !== "1234") { alert("Code PIN Admin incorrect (1234)"); return; }
+  if (role === "WORKER" && pin !== "0000") { alert("Code PIN Salarié incorrect (0000)"); return; }
+  currentRole = role;
+  currentWorkerId = role === "WORKER" ? document.getElementById("workerSelectDropdown").value : null;
+  document.getElementById("loginScreen").classList.add("hidden");
+  document.getElementById("appContainer").classList.remove("hidden");
+  document.getElementById("bottomNav").classList.remove("hidden");
+  document.getElementById("adminAddForms").classList.toggle("hidden", role !== "ADMIN");
+  document.getElementById("adminStockForm").classList.toggle("hidden", role !== "ADMIN");
+  document.getElementById("adminQuickActions").classList.toggle("hidden", role !== "ADMIN");
+  document.getElementById("roleBadge").textContent = role === "ADMIN" ? "MODE ADMIN (Accès Complet)" : "PORTAIL SALARIÉ (Lecture Seule)";
+  renderAll();
+}
+
+function logout() {
+  document.getElementById("loginScreen").classList.remove("hidden");
+  document.getElementById("appContainer").classList.add("hidden");
+  document.getElementById("bottomNav").classList.add("hidden");
+}
+
+function switchTab(tabId) {
+  ["tabDashboard", "tabEmployees", "tabStock", "tabSync"].forEach(id => {
+    document.getElementById(id).classList.toggle("hidden", id !== tabId);
+  });
+  document.getElementById("btnTabDashboard").classList.toggle("active", tabId === "tabDashboard");
+  document.getElementById("btnTabEmployees").classList.toggle("active", tabId === "tabEmployees");
+  document.getElementById("btnTabStock").classList.toggle("active", tabId === "tabStock");
+  document.getElementById("btnTabSync").classList.toggle("active", tabId === "tabSync");
+}
+
+function addAttendance() {
+  const empId = document.getElementById("actionEmpSelect").value;
+  const h = parseFloat(document.getElementById("hoursInput").value);
+  const comp = document.getElementById("companyInput").value.trim();
+  if (!h || h <= 0) { alert("Entrez le nombre d'heures travaillées"); return; }
+  const emp = state.employees.find(e => e.id === empId);
+  if (!emp) return;
+  const normal = Math.min(9, h);
+  const ot = Math.max(0, h - 9);
+  emp.normalH += normal;
+  emp.otH += ot;
+  if (comp) emp.company = comp;
+  document.getElementById("hoursInput").value = "";
+  saveState();
+}
+
+function addAdvance() {
+  const empId = document.getElementById("actionEmpSelect").value;
+  const amt = parseFloat(document.getElementById("advanceInput").value);
+  if (!amt || amt <= 0) { alert("Entrez le montant de l'avance en MAD"); return; }
+  const emp = state.employees.find(e => e.id === empId);
+  if (!emp) return;
+  emp.advances += amt;
+  document.getElementById("advanceInput").value = "";
+  saveState();
+}
+
+function addOrUpdateStock() {
+  const name = document.getElementById("stockName").value.trim();
+  const qty = parseFloat(document.getElementById("stockQty").value);
+  const min = parseFloat(document.getElementById("stockMin").value) || 5;
+  if (!name || isNaN(qty)) { alert("Remplissez le nom et la quantité"); return; }
+  state.stock.unshift({ name, qty, min, unit: "Unités" });
+  document.getElementById("stockName").value = "";
+  document.getElementById("stockQty").value = "";
+  saveState();
+}
+
+function shareWhatsApp(empId) {
+  const e = state.employees.find(x => x.id === empId);
+  if (!e) return;
+  const gross = (e.normalH * e.rate) + (e.otH * e.otRate);
+  const net = Math.max(0, gross - e.advances);
+  const msg = `🔥 *ÉQUIPEMENTS THERMIQUES — Fiche Salarié*\n👷 *${e.name}* (${e.role})\n🏢 Chantier : ${e.company}\n⏱️ Heures Normales (9h/j) : ${e.normalH}h\n⚡ Heures Sup (>9h/j) : +${e.otH}h\n💰 Brut Cumulé : ${gross.toFixed(0)} MAD\n💸 Avances Reçues : -${e.advances.toFixed(0)} MAD\n✅ *RESTE NET À PAYER : ${net.toFixed(0)} MAD*`;
+  window.open("https://wa.me/?text=" + encodeURIComponent(msg), "_blank");
+}
+
+function shareDatabaseViaWhatsApp() {
+  const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(state))));
+  const msg = `🔥 *THERMOPOINT SYNC CODE (Collez dans Base/Sync)* :\n${encoded}`;
+  window.open("https://wa.me/?text=" + encodeURIComponent(msg), "_blank");
+}
+
+function downloadDatabaseBackup() {
+  const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "ThermoPoint_Database_Backup.json";
+  a.click();
+}
+
+function importDatabaseFromCode() {
+  const raw = document.getElementById("syncImportBox").value.trim();
+  if (!raw) { alert("Collez le code de synchronisation"); return; }
+  try {
+    const cleaned = raw.includes(":") ? raw.split(":").pop().trim() : raw;
+    const parsed = JSON.parse(decodeURIComponent(escape(atob(cleaned))));
+    if (parsed && parsed.employees) {
+      state = parsed;
+      saveState();
+      document.getElementById("syncImportBox").value = "";
+      alert("✅ Base de données synchronisée avec succès !");
+    }
+  } catch (err) {
+    alert("Code invalide. Vérifiez que vous avez copié tout le message.");
+  }
+}
+
+function renderAll() {
+  populateDropdowns();
+  const lastSavedEl = document.getElementById("lastSavedText");
+  if (lastSavedEl) lastSavedEl.textContent = state.updatedAt || "À l'instant";
+
+  const visibleEmps = currentRole === "WORKER"
+    ? state.employees.filter(e => e.id === currentWorkerId)
+    : state.employees;
+
+  let totalNet = 0, totalAdv = 0, totalHours = 0;
+  state.employees.forEach(e => {
+    const gross = (e.normalH * e.rate) + (e.otH * e.otRate);
+    totalNet += Math.max(0, gross - e.advances);
+    totalAdv += e.advances;
+    totalHours += (e.normalH + e.otH);
+  });
+  const lowStockCount = state.stock.filter(s => s.qty <= s.min).length;
+
+  document.getElementById("kpiGrid").innerHTML = `
+    <div class="kpi"><div class="lbl">Reste Net à Payer</div><div class="val" style="color:var(--green)">${totalNet.toFixed(0)} MAD</div></div>
+    <div class="kpi"><div class="lbl">Total Avances</div><div class="val" style="color:var(--amber)">${totalAdv.toFixed(0)} MAD</div></div>
+    <div class="kpi"><div class="lbl">Heures Pointées</div><div class="val" style="color:var(--cyan)">${totalHours} h</div></div>
+    <div class="kpi"><div class="lbl">Alertes Stock</div><div class="val" style="color:var(--red)">${lowStockCount} critiques</div></div>
+  `;
+
+  document.getElementById("employeesList").innerHTML = visibleEmps.map(e => {
+    const gross = (e.normalH * e.rate) + (e.otH * e.otRate);
+    const net = Math.max(0, gross - e.advances);
+    return `
+      <div class="card">
+        <div class="row">
+          <div>
+            <div style="font-weight:800;font-size:16px">${e.name}</div>
+            <div style="font-size:12px;color:var(--muted)">${e.role} • 🏢 ${e.company}</div>
+          </div>
+          <span class="pill" style="background:rgba(0,200,83,0.18);color:var(--green)">Reste: ${net.toFixed(0)} MAD</span>
+        </div>
+        <div style="font-size:12px;margin:10px 0;line-height:1.6">
+          ⏱️ Normales (9h/j) : <b>${e.normalH}h</b> (${e.rate} MAD/h) | ⚡ Heures Sup : <b>+${e.otH}h</b> (${e.otRate} MAD/h)<br/>
+          💰 Salaire Brut : <b>${gross.toFixed(0)} MAD</b> | 💸 Avances : <b style="color:var(--amber)">-${e.advances.toFixed(0)} MAD</b><br/>
+          📅 Payé Mois Dernier : <b>${e.lastMonthPaid} MAD</b>
+        </div>
+        <button class="whatsapp" onclick="shareWhatsApp('${e.id}')">📲 Envoyer Fiche WhatsApp (*6)</button>
+      </div>
+    `;
+  }).join("");
+
+  document.getElementById("stockList").innerHTML = state.stock.map(s => {
+    const isLow = s.qty <= s.min;
+    return `
+      <div class="card">
+        <div class="row">
+          <div>
+            <div style="font-weight:700">${s.name}</div>
+            <div style="font-size:12px;color:var(--muted)">Seuil minimum : ${s.min} ${s.unit}</div>
+          </div>
+          <span class="pill" style="background:${isLow ? 'rgba(255,82,82,0.2)' : 'rgba(0,200,83,0.2)'};color:${isLow ? 'var(--red)' : 'var(--green)'}">
+            ${s.qty} ${s.unit} ${isLow ? '⚠️ BAS' : '✅ OK'}
+          </span>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+populateDropdowns();
+</script>
+</body>
+</html>

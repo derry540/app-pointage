@@ -1,0 +1,339 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Pillar 1: Global Default-Deny Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Core Primitives
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // 1. EmployeeProfile Validation Blueprint
+    function isValidEmployeeProfile(data) {
+      return data.keys().hasAll([
+               'userId', 'fullName', 'workerEmail', 'role', 'specialty',
+               'hourlyRate', 'overtimeBonusRate', 'commissionPercent',
+               'lastMonthPaidTotal', 'createdAt', 'updatedAt'
+             ]) &&
+             data.keys().hasOnly([
+               'userId', 'fullName', 'workerEmail', 'role', 'specialty',
+               'hourlyRate', 'overtimeBonusRate', 'commissionPercent',
+               'lastMonthPaidTotal', 'createdAt', 'updatedAt'
+             ]) &&
+             data.userId is string && data.userId.size() >= 1 && data.userId.size() <= 128 &&
+             data.userId == request.auth.uid &&
+             data.fullName is string && data.fullName.size() >= 1 && data.fullName.size() <= 100 &&
+             data.workerEmail is string && data.workerEmail.size() <= 150 &&
+             data.role is string && data.role in ['ADMIN', 'MANAGER', 'WORKER'] &&
+             data.specialty is string && data.specialty.size() >= 1 && data.specialty.size() <= 80 &&
+             data.hourlyRate is number && data.hourlyRate >= 0 && data.hourlyRate <= 100000 &&
+             data.overtimeBonusRate is number && data.overtimeBonusRate >= 0 && data.overtimeBonusRate <= 100000 &&
+             data.commissionPercent is number && data.commissionPercent >= 0 && data.commissionPercent <= 100 &&
+             data.lastMonthPaidTotal is number && data.lastMonthPaidTotal >= 0 && data.lastMonthPaidTotal <= 10000000 &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    match /employees/{employeeId} {
+      allow get: if isSignedIn() && isValidId(employeeId) && existing().userId == request.auth.uid;
+      allow list: if isSignedIn() && existing().userId == request.auth.uid;
+      allow create: if isSignedIn() && isValidId(employeeId) && isValidEmployeeProfile(incoming());
+      allow update: if isSignedIn() && isValidEmployeeProfile(incoming()) && isValidId(employeeId) &&
+                       existing().userId == request.auth.uid &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly([
+                         'fullName', 'workerEmail', 'role', 'specialty',
+                         'hourlyRate', 'overtimeBonusRate', 'commissionPercent',
+                         'lastMonthPaidTotal', 'updatedAt'
+                       ]);
+      allow delete: if isSignedIn() && isValidId(employeeId) && existing().userId == request.auth.uid;
+    }
+
+    // 2. AttendanceLog Validation Blueprint
+    function isValidAttendanceLog(data) {
+      return data.keys().hasAll([
+               'userId', 'employeeId', 'employeeName', 'date', 'monthKey',
+               'companyName', 'shiftsSummary', 'taskDescription', 'dailyNote',
+               'performanceRating', 'totalHours', 'regularHours', 'overtimeHours',
+               'dailyPay', 'recordedBy', 'createdAt', 'updatedAt'
+             ]) &&
+             data.keys().hasOnly([
+               'userId', 'employeeId', 'employeeName', 'date', 'monthKey',
+               'companyName', 'shiftsSummary', 'taskDescription', 'dailyNote',
+               'performanceRating', 'totalHours', 'regularHours', 'overtimeHours',
+               'dailyPay', 'recordedBy', 'createdAt', 'updatedAt'
+             ]) &&
+             data.userId is string && data.userId.size() >= 1 && data.userId.size() <= 128 &&
+             data.userId == request.auth.uid &&
+             data.employeeId is string && data.employeeId.size() >= 1 && data.employeeId.size() <= 128 &&
+             data.employeeName is string && data.employeeName.size() >= 1 && data.employeeName.size() <= 100 &&
+             data.date is string && data.date.size() >= 1 && data.date.size() <= 20 &&
+             data.monthKey is string && data.monthKey.size() >= 1 && data.monthKey.size() <= 10 &&
+             data.companyName is string && data.companyName.size() >= 1 && data.companyName.size() <= 120 &&
+             data.shiftsSummary is string && data.shiftsSummary.size() >= 1 && data.shiftsSummary.size() <= 500 &&
+             data.taskDescription is string && data.taskDescription.size() <= 300 &&
+             data.dailyNote is string && data.dailyNote.size() <= 300 &&
+             data.performanceRating is int && data.performanceRating >= 1 && data.performanceRating <= 5 &&
+             data.totalHours is number && data.totalHours >= 0 && data.totalHours <= 24 &&
+             data.regularHours is number && data.regularHours >= 0 && data.regularHours <= 9 &&
+             data.overtimeHours is number && data.overtimeHours >= 0 && data.overtimeHours <= 15 &&
+             data.dailyPay is number && data.dailyPay >= 0 && data.dailyPay <= 1000000 &&
+             data.recordedBy is string && data.recordedBy.size() >= 1 && data.recordedBy.size() <= 100 &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    match /attendance_logs/{logId} {
+      allow get: if isSignedIn() && isValidId(logId) && existing().userId == request.auth.uid;
+      allow list: if isSignedIn() && existing().userId == request.auth.uid;
+      allow create: if isSignedIn() && isValidId(logId) && isValidAttendanceLog(incoming());
+      allow update: if isSignedIn() && isValidAttendanceLog(incoming()) && isValidId(logId) &&
+                       existing().userId == request.auth.uid &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly([
+                         'employeeId', 'employeeName', 'date', 'monthKey',
+                         'companyName', 'shiftsSummary', 'taskDescription', 'dailyNote',
+                         'performanceRating', 'totalHours', 'regularHours', 'overtimeHours',
+                         'dailyPay', 'recordedBy', 'updatedAt'
+                       ]);
+      allow delete: if isSignedIn() && isValidId(logId) && existing().userId == request.auth.uid;
+    }
+
+    // 3. SalaryAdvance Validation Blueprint
+    function isValidSalaryAdvance(data) {
+      return data.keys().hasAll([
+               'userId', 'employeeId', 'employeeName', 'amount',
+               'date', 'monthKey', 'note', 'recordedBy', 'createdAt', 'updatedAt'
+             ]) &&
+             data.keys().hasOnly([
+               'userId', 'employeeId', 'employeeName', 'amount',
+               'date', 'monthKey', 'note', 'recordedBy', 'createdAt', 'updatedAt'
+             ]) &&
+             data.userId is string && data.userId.size() >= 1 && data.userId.size() <= 128 &&
+             data.userId == request.auth.uid &&
+             data.employeeId is string && data.employeeId.size() >= 1 && data.employeeId.size() <= 128 &&
+             data.employeeName is string && data.employeeName.size() >= 1 && data.employeeName.size() <= 100 &&
+             data.amount is number && data.amount > 0 && data.amount <= 1000000 &&
+             data.date is string && data.date.size() >= 1 && data.date.size() <= 20 &&
+             data.monthKey is string && data.monthKey.size() >= 1 && data.monthKey.size() <= 10 &&
+             data.note is string && data.note.size() <= 250 &&
+             data.recordedBy is string && data.recordedBy.size() >= 1 && data.recordedBy.size() <= 100 &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    match /advances/{advanceId} {
+      allow get: if isSignedIn() && isValidId(advanceId) && existing().userId == request.auth.uid;
+      allow list: if isSignedIn() && existing().userId == request.auth.uid;
+      allow create: if isSignedIn() && isValidId(advanceId) && isValidSalaryAdvance(incoming());
+      allow update: if isSignedIn() && isValidSalaryAdvance(incoming()) && isValidId(advanceId) &&
+                       existing().userId == request.auth.uid &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly([
+                         'amount', 'date', 'monthKey', 'note', 'recordedBy', 'updatedAt'
+                       ]);
+      allow delete: if isSignedIn() && isValidId(advanceId) && existing().userId == request.auth.uid;
+    }
+
+    // 4. ClientCompany Validation Blueprint
+    function isValidClientCompany(data) {
+      return data.keys().hasAll([
+               'userId', 'name', 'city', 'contactName', 'phone',
+               'contractType', 'createdAt', 'updatedAt'
+             ]) &&
+             data.keys().hasOnly([
+               'userId', 'name', 'city', 'contactName', 'phone',
+               'contractType', 'createdAt', 'updatedAt'
+             ]) &&
+             data.userId is string && data.userId.size() >= 1 && data.userId.size() <= 128 &&
+             data.userId == request.auth.uid &&
+             data.name is string && data.name.size() >= 1 && data.name.size() <= 120 &&
+             data.city is string && data.city.size() >= 1 && data.city.size() <= 80 &&
+             data.contactName is string && data.contactName.size() <= 100 &&
+             data.phone is string && data.phone.size() <= 40 &&
+             data.contractType is string && data.contractType.size() >= 1 && data.contractType.size() <= 60 &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    match /companies/{companyId} {
+      allow get: if isSignedIn() && isValidId(companyId) && existing().userId == request.auth.uid;
+      allow list: if isSignedIn() && existing().userId == request.auth.uid;
+      allow create: if isSignedIn() && isValidId(companyId) && isValidClientCompany(incoming());
+      allow update: if isSignedIn() && isValidClientCompany(incoming()) && isValidId(companyId) &&
+                       existing().userId == request.auth.uid &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly([
+                         'name', 'city', 'contactName', 'phone', 'contractType', 'updatedAt'
+                       ]);
+      allow delete: if isSignedIn() && isValidId(companyId) && existing().userId == request.auth.uid;
+    }
+
+    // 5. StockItem Validation Blueprint
+    function isValidStockItem(data) {
+      return data.keys().hasAll([
+               'userId', 'name', 'category', 'currentQuantity', 'reorderPoint',
+               'unit', 'unitPrice', 'supplierName', 'dailyTaskNote', 'createdAt', 'updatedAt'
+             ]) &&
+             data.keys().hasOnly([
+               'userId', 'name', 'category', 'currentQuantity', 'reorderPoint',
+               'unit', 'unitPrice', 'supplierName', 'dailyTaskNote', 'createdAt', 'updatedAt'
+             ]) &&
+             data.userId is string && data.userId.size() >= 1 && data.userId.size() <= 128 &&
+             data.userId == request.auth.uid &&
+             data.name is string && data.name.size() >= 1 && data.name.size() <= 120 &&
+             data.category is string && data.category.size() >= 1 && data.category.size() <= 60 &&
+             data.currentQuantity is int && data.currentQuantity >= 0 && data.currentQuantity <= 1000000 &&
+             data.reorderPoint is int && data.reorderPoint >= 0 && data.reorderPoint <= 1000000 &&
+             data.unit is string && data.unit.size() >= 1 && data.unit.size() <= 30 &&
+             data.unitPrice is number && data.unitPrice >= 0 && data.unitPrice <= 10000000 &&
+             data.supplierName is string && data.supplierName.size() <= 120 &&
+             data.dailyTaskNote is string && data.dailyTaskNote.size() <= 300 &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    match /stock_items/{itemId} {
+      allow get: if isSignedIn() && isValidId(itemId) && existing().userId == request.auth.uid;
+      allow list: if isSignedIn() && existing().userId == request.auth.uid;
+      allow create: if isSignedIn() && isValidId(itemId) && isValidStockItem(incoming());
+      allow update: if isSignedIn() && isValidStockItem(incoming()) && isValidId(itemId) &&
+                       existing().userId == request.auth.uid &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly([
+                         'name', 'category', 'currentQuantity', 'reorderPoint',
+                         'unit', 'unitPrice', 'supplierName', 'dailyTaskNote', 'updatedAt'
+                       ]);
+      allow delete: if isSignedIn() && isValidId(itemId) && existing().userId == request.auth.uid;
+    }
+
+    // 6. DailyProcurement Validation Blueprint
+    function isValidDailyProcurement(data) {
+      return data.keys().hasAll([
+               'userId', 'date', 'companyId', 'companyName', 'itemName',
+               'quantity', 'unitCost', 'totalCost', 'status', 'createdAt', 'updatedAt'
+             ]) &&
+             data.keys().hasOnly([
+               'userId', 'date', 'companyId', 'companyName', 'itemName',
+               'quantity', 'unitCost', 'totalCost', 'status', 'createdAt', 'updatedAt'
+             ]) &&
+             data.userId is string && data.userId.size() >= 1 && data.userId.size() <= 128 &&
+             data.userId == request.auth.uid &&
+             data.date is string && data.date.size() >= 1 && data.date.size() <= 20 &&
+             data.companyId is string && data.companyId.size() >= 1 && data.companyId.size() <= 128 &&
+             data.companyName is string && data.companyName.size() >= 1 && data.companyName.size() <= 120 &&
+             data.itemName is string && data.itemName.size() >= 1 && data.itemName.size() <= 120 &&
+             data.quantity is int && data.quantity > 0 && data.quantity <= 1000000 &&
+             data.unitCost is number && data.unitCost >= 0 && data.unitCost <= 10000000 &&
+             data.totalCost is number && data.totalCost >= 0 && data.totalCost <= 100000000 &&
+             data.status is string && data.status in ['NEEDED', 'ORDERED', 'RECEIVED'] &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    match /daily_procurements/{procurementId} {
+      allow get: if isSignedIn() && isValidId(procurementId) && existing().userId == request.auth.uid;
+      allow list: if isSignedIn() && existing().userId == request.auth.uid;
+      allow create: if isSignedIn() && isValidId(procurementId) && isValidDailyProcurement(incoming());
+      allow update: if isSignedIn() && isValidDailyProcurement(incoming()) && isValidId(procurementId) &&
+                       existing().userId == request.auth.uid &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly([
+                         'date', 'companyId', 'companyName', 'itemName',
+                         'quantity', 'unitCost', 'totalCost', 'status', 'updatedAt'
+                       ]);
+      allow delete: if isSignedIn() && isValidId(procurementId) && existing().userId == request.auth.uid;
+    }
+
+    // 7. SupplierRecord Validation Blueprint
+    function isValidSupplierRecord(data) {
+      return data.keys().hasAll([
+               'userId', 'name', 'contactInfo', 'paymentTerms', 'invoiceReference',
+               'amountDue', 'amountPaid', 'dueDate', 'status', 'reminderEnabled',
+               'createdAt', 'updatedAt'
+             ]) &&
+             data.keys().hasOnly([
+               'userId', 'name', 'contactInfo', 'paymentTerms', 'invoiceReference',
+               'amountDue', 'amountPaid', 'dueDate', 'status', 'reminderEnabled',
+               'createdAt', 'updatedAt'
+             ]) &&
+             data.userId is string && data.userId.size() >= 1 && data.userId.size() <= 128 &&
+             data.userId == request.auth.uid &&
+             data.name is string && data.name.size() >= 1 && data.name.size() <= 120 &&
+             data.contactInfo is string && data.contactInfo.size() >= 1 && data.contactInfo.size() <= 150 &&
+             data.paymentTerms is string && data.paymentTerms.size() >= 1 && data.paymentTerms.size() <= 80 &&
+             data.invoiceReference is string && data.invoiceReference.size() >= 1 && data.invoiceReference.size() <= 80 &&
+             data.amountDue is number && data.amountDue >= 0 && data.amountDue <= 100000000 &&
+             data.amountPaid is number && data.amountPaid >= 0 && data.amountPaid <= 100000000 &&
+             data.dueDate is string && data.dueDate.size() >= 1 && data.dueDate.size() <= 20 &&
+             data.status is string && data.status in ['PENDING', 'PARTIAL', 'PAID', 'OVERDUE'] &&
+             data.reminderEnabled is bool &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    match /suppliers/{supplierId} {
+      allow get: if isSignedIn() && isValidId(supplierId) && existing().userId == request.auth.uid;
+      allow list: if isSignedIn() && existing().userId == request.auth.uid;
+      allow create: if isSignedIn() && isValidId(supplierId) && isValidSupplierRecord(incoming());
+      allow update: if isSignedIn() && isValidSupplierRecord(incoming()) && isValidId(supplierId) &&
+                       existing().userId == request.auth.uid &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly([
+                         'name', 'contactInfo', 'paymentTerms', 'invoiceReference',
+                         'amountDue', 'amountPaid', 'dueDate', 'status', 'reminderEnabled', 'updatedAt'
+                       ]);
+      allow delete: if isSignedIn() && isValidId(supplierId) && existing().userId == request.auth.uid;
+    }
+
+    // 8. AuditLogEntry Validation Blueprint (Append-Only Immutable History)
+    function isValidAuditLogEntry(data) {
+      return data.keys().hasAll([
+               'userId', 'actorName', 'actorRole', 'actionType',
+               'module', 'details', 'createdAt'
+             ]) &&
+             data.keys().hasOnly([
+               'userId', 'actorName', 'actorRole', 'actionType',
+               'module', 'details', 'createdAt'
+             ]) &&
+             data.userId is string && data.userId.size() >= 1 && data.userId.size() <= 128 &&
+             data.userId == request.auth.uid &&
+             data.actorName is string && data.actorName.size() >= 1 && data.actorName.size() <= 100 &&
+             data.actorRole is string && data.actorRole.size() >= 1 && data.actorRole.size() <= 40 &&
+             data.actionType is string && data.actionType in ['CREATE', 'UPDATE', 'DELETE', 'EXPORT', 'ERP_SYNC', 'ROLE_CHANGE'] &&
+             data.module is string && data.module.size() >= 1 && data.module.size() <= 60 &&
+             data.details is string && data.details.size() >= 1 && data.details.size() <= 400 &&
+             data.createdAt is timestamp && data.createdAt <= request.time;
+    }
+
+    match /audit_logs/{auditId} {
+      allow get: if isSignedIn() && isValidId(auditId) && existing().userId == request.auth.uid;
+      allow list: if isSignedIn() && existing().userId == request.auth.uid;
+      allow create: if isSignedIn() && isValidId(auditId) && isValidAuditLogEntry(incoming());
+      allow update, delete: if false;
+    }
+  }
+}

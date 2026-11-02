@@ -1,0 +1,6 @@
+{
+  "name": "ThermoPoint Pro",
+  "description": "Gestion de pointage horaire, paie, avances, stock, fournisseurs et synchronisation Memesoft Oxygène ERP pour Équipements Thermiques.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

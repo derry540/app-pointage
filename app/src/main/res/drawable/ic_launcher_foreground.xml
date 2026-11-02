@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Outer Precision Gear & Clock Ring -->
+    <path
+        android:fillColor="#38BDF8"
+        android:pathData="M54,24 C37.43,24 24,37.43 24,54 C24,70.57 37.43,84 54,84 C70.57,84 84,70.57 84,54 C84,37.43 70.57,24 54,24 Z M54,76 C41.85,76 32,66.15 32,54 C32,41.85 41.85,32 54,32 C66.15,32 76,41.85 76,54 C76,66.15 66.15,76 54,76 Z" />
+    <!-- Bold Thermal Flame Silhouette Inside -->
+    <path
+        android:fillColor="#F97316"
+        android:pathData="M55,34 C55,34 69,45 69,58 C69,66.28 62.28,73 54,73 C45.72,73 39,66.28 39,58 C39,51 44,45 47,42 C47,46 50,49 52,49 C50,43 52,37 55,34 Z" />
+    <!-- Inner White-Hot Core / Clock Hand Accent -->
+    <path
+        android:fillColor="#FDE047"
+        android:pathData="M54,48 L54,58 L61,62 L63,59 L57,55 L57,48 Z" />
+</vector>
